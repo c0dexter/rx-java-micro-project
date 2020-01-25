@@ -9,7 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
@@ -18,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     //ui
     private TextView text;
     private String TAG = getClass().getName();
+
+    // vars
+    private CompositeDisposable disposables = new CompositeDisposable(); // Create this object (it's a list) for CLEANING OBSERVERS
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSubscribe(Disposable d) {
                 Log.d(TAG, "onSubscribe: called.");
+                disposables.add(d);     // Add this disposable (d) to the disposables list
             }
+
 
             @Override
             public void onNext(Task task) {
@@ -73,5 +80,21 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onComplete: called");
             }
         });
+
+        // There is more possibilities to create observers and subscribe to observables
+        disposables.add(taskObservable.subscribe(new Consumer<Task>() { // this implementation returns disposables, so we can add it to disposables here
+            @Override
+            public void accept(Task task) throws Exception {
+
+            }
+        }));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposables.clear();    // .clear is using for clearing observers without clearing observables
+        // .dispose is using for HARD CLEARING observers with observables
+        // In MVVM architecture, clearing disposables is executed in ViewModel class in the onClear() method
     }
 }
