@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         final Observable<Task> observable = Observable
                 .range(0, 9)
                 .subscribeOn(Schedulers.io())
-                .map(new Function<Integer, Task>() {
+                .map(new Function<Integer, Task>() {    // this will be executed on the BG thread, because the previous takes "Schedulers.io"
                     @Override
                     public Task apply(Integer integer) throws Exception {
                         Log.d(TAG, "Applied: " + Thread.currentThread().getName());
