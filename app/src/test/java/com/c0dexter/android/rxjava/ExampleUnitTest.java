@@ -1,4 +1,4 @@
-package com.vogella.android.rxjava;
+package com.c0dexter.android.rxjava;
 
 import org.junit.Test;
 

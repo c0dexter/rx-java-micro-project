@@ -1,4 +1,4 @@
-package com.vogella.android.rxjava;
+package com.c0dexter.android.rxjava;
 
 public class Task {
 

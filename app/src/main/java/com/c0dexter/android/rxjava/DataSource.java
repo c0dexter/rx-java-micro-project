@@ -1,4 +1,4 @@
-package com.vogella.android.rxjava;
+package com.c0dexter.android.rxjava;
 
 import java.util.ArrayList;
 import java.util.List;
