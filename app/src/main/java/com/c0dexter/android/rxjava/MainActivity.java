@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -30,71 +32,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
-//        This is a very basic example.
-//        But it showcases the general structure of every Observable / Observer interaction.
-//
-//        1. Create an Observable
-//        2. Apply an operator to the Observable
-//        3. Designate what thread to do the work on and what thread to emit the results to
-//        4. Subscribe an Observer to the Observable and view the results
+        // emit single observable after a given delay
+        Observable<Long> timeObservable = Observable
+                .timer(3, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
 
-        Observable<Task> taskObservable = Observable        // Create observable
-                .fromIterable(DataSource.createTasksList()) // Apply operator to the Observable
-                .subscribeOn(Schedulers.io())               // Subscribe on a tread
-                .filter(new Predicate<Task>() {
-                    @Override
-                    public boolean test(Task task) throws Exception {              // (another operator if we want)
-                        Log.d(TAG, "Test: " + Thread.currentThread().getName());
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        return task.isComplete();
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread()); // Describe where you observe on
-
-
-        taskObservable.subscribe(new Observer<Task>() {     // Subscribe observers which will view the results on a the designated thread as observe thread
+        timeObservable.subscribe(new Observer<Long>() {
             @Override
             public void onSubscribe(Disposable d) {
-                Log.d(TAG, "onSubscribe: called.");
-                disposables.add(d);     // Add this disposable (d) to the disposables list
+
             }
 
-
             @Override
-            public void onNext(Task task) {
-                Log.d(TAG, "onNext: " + Thread.currentThread().getName());
-                Log.d(TAG, "onNext: " + task.getDescription());
+            public void onNext(Long aLong) {
+                Log.d(TAG, "onNext after 3 seconds elapsed: " + aLong);
             }
 
             @Override
             public void onError(Throwable e) {
-                Log.e(TAG, "onError: " + e);
+
             }
 
             @Override
             public void onComplete() {
-                Log.d(TAG, "onComplete: called");
+
             }
         });
-
-        // There is more possibilities to create observers and subscribe to observables
-        disposables.add(taskObservable.subscribe(new Consumer<Task>() { // this implementation returns disposables, so we can add it to disposables here
-            @Override
-            public void accept(Task task) throws Exception {
-
-            }
-        }));
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        disposables.clear();    // .clear is using for clearing observers without clearing observables
-        // .dispose is using for HARD CLEARING observers with observables
-        // In MVVM architecture, clearing disposables is executed in ViewModel class in the onClear() method
     }
 }
